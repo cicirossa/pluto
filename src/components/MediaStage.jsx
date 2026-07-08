@@ -17,17 +17,29 @@ const PHASE = {
 // Slot 0 is always the hero (centred, front, largest). The rest sit behind it.
 const LAYOUTS = {
   1: [
-    { top: '14%', left: '26%', width: '48%', rotate: -1.5, z: 5, depth: 0.6, tape: [{ top: '-10px', left: '42%', rotate: -5 }] },
+    { top: '12%', left: '34%', width: '32%', rotate: -1.5, z: 5, depth: 0.6, tape: [{ top: '-10px', left: '42%', rotate: -5 }] },
   ],
   2: [
-    { top: '16%', left: '30%', width: '46%', rotate: -1.5, z: 5, depth: 0.6 },
-    { top: '30%', left: '6%', width: '30%', rotate: -5, z: 2, depth: 0.9 },
+    { top: '15%', left: '36%', width: '32%', rotate: -1.5, z: 5, depth: 0.6 },
+    { top: '30%', left: '8%', width: '23%', rotate: -5, z: 2, depth: 0.9 },
   ],
   3: [
-    { top: '18%', left: '32%', width: '44%', rotate: -1.5, z: 5, depth: 0.55 },
-    { top: '12%', left: '5%', width: '28%', rotate: -6, z: 2, depth: 0.95 },
-    { top: '46%', left: '66%', width: '27%', rotate: 5, z: 2, depth: 0.85 },
+    { top: '16%', left: '37%', width: '30%', rotate: -1.5, z: 5, depth: 0.55 },
+    { top: '13%', left: '7%', width: '22%', rotate: -6, z: 2, depth: 0.95 },
+    { top: '48%', left: '70%', width: '21%', rotate: 5, z: 2, depth: 0.85 },
   ],
+}
+
+// Compact, high-placed hero used when a caption is shown, so the caption below
+// always fits inside the stage without clipping.
+const CAPTION_HERO = {
+  top: '4%',
+  left: '32%',
+  width: '36%',
+  rotate: -1.5,
+  z: 5,
+  depth: 0.5,
+  tape: [{ top: '-10px', left: '42%', rotate: -5 }],
 }
 
 export default function MediaStage() {
@@ -67,7 +79,7 @@ export default function MediaStage() {
       const showCaption =
         tier === 'hero' && !!photo.caption && !captionSeen.current.has(photo.id)
       return {
-        slot,
+        slot: showCaption ? CAPTION_HERO : slot,
         photo,
         key: `${photo.id}-${i}`,
         tier,

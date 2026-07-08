@@ -1,6 +1,13 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useFrame } from '../context/TimelineContext'
+
+// Keep frames from becoming huge: clamp any photo's aspect ratio between a
+// gentle portrait (4:5) and landscape (3:2). Tall phone shots (9:16) get
+// cropped to a tidy frame via object-cover instead of overflowing the stage.
+const MIN_AR = 4 / 5
+const MAX_AR = 3 / 2
+const clampAr = (ar) => Math.min(Math.max(ar, MIN_AR), MAX_AR)
 
 // A single projected memory: paper border, warm shadow, animated golden glow,
 // tiny rotation, V3 idle motion (float 5–8px, rotate ±1.5°, zoom 1.00→1.08 over
@@ -11,6 +18,13 @@ const DEFAULT_TAPE = [{ top: '-10px', left: '40%', rotate: -6 }]
 export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier = 'hero', caption = null }) {
   const ref = useRef(null)
   const isHero = tier === 'hero'
+
+  // Frame aspect: start from the manifest orientation, correct to the image's
+  // real (clamped) aspect once it loads. Captioned hero stays a compact 3:2.
+  const initialAr =
+    photo.orientation === 'landscape' ? 1.5 : photo.orientation === 'square' ? 1 : MIN_AR
+  const [naturalAr, setNaturalAr] = useState(null)
+  const frameAr = caption ? 1.5 : naturalAr ? clampAr(naturalAr) : initialAr
 
   // Mouse parallax — depth scaled by slot.depth and current energy.
   useFrame(
@@ -65,11 +79,18 @@ export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier
                 : 'brightness(0.82) saturate(0.9) blur(0.6px)',
             }}
           >
-            <div className="relative overflow-hidden rounded-[2px] bg-brown-deep/10">
+            <div
+              className="relative overflow-hidden rounded-[2px] bg-brown-deep/10"
+              style={{ aspectRatio: String(frameAr) }}
+            >
               <motion.img
                 src={photo.src}
                 alt=""
                 loading="lazy"
+                onLoad={(e) => {
+                  const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+                  if (w && h) setNaturalAr(w / h)
+                }}
                 className="block h-full w-full object-cover"
                 style={{ willChange: 'transform' }}
                 animate={{ scale: [1.0, 1.08, 1.0], x: ['0%', '-4%', '0%'], y: ['0%', '3%', '0%'] }}
@@ -101,7 +122,7 @@ export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier
           the photo frame, and softly shadowed text. Editable placeholder. */}
       {caption && (
         <motion.figcaption
-          className="absolute left-1/2 top-full z-20 mt-4 w-[88%] -translate-x-1/2"
+          className="absolute left-1/2 top-full z-20 mt-3 w-[min(80vw,30rem)] -translate-x-1/2"
           initial={{ opacity: 0, y: 12, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, transition: { duration: 0.5 } }}
@@ -109,9 +130,9 @@ export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier
         >
           {/* paper mat, mirroring the photo's outline */}
           <div className="shadow-scrap rounded-[4px] bg-paper/80 p-1.5 backdrop-blur-md">
-            <div className="rounded-[2px] px-4 py-2.5 text-center ring-1 ring-brown/15">
+            <div className="rounded-[2px] px-4 py-2 text-center ring-1 ring-brown/15">
               <p
-                className="font-serif text-[0.95rem] leading-snug text-brown sm:text-base"
+                className="font-serif text-[0.8rem] leading-snug text-brown sm:text-[0.9rem]"
                 style={{
                   textShadow:
                     '0 1px 10px rgba(245,235,217,0.9), 0 1px 2px rgba(58,44,34,0.2)',

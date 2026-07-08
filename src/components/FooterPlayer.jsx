@@ -67,7 +67,7 @@ const FooterPlayer = forwardRef(function FooterPlayer(
   return (
     <footer
       ref={ref}
-      className="glass z-40 flex h-[110px] w-full items-center gap-4 px-4 shadow-scrap md:px-8"
+      className="glass z-40 flex h-[92px] w-full items-center gap-4 px-4 shadow-scrap md:px-8"
     >
       {/* Now playing — album CD dock slot */}
       <div className="flex min-w-0 flex-1 items-center gap-3">

@@ -42,42 +42,79 @@ function PhaseEffects({ beamRef }) {
 
 // Sequentially-typed dedication over the opening.
 function OpeningIntro() {
-  const [i, setI] = useState(0)
-  const isLast = i >= OPENING_LINES.length - 1
-  const { text, done } = useTypingText(OPENING_LINES[i], {
-    speed: i === 2 ? 90 : 34,
-    startDelay: i === 0 ? 300 : 220,
+  const [step, setStep] = useState(0)
+  const sequence = [0, 1, 3]
+  const isLast = step >= sequence.length - 1
+  const currentLineIndex = sequence[step]
+  
+  const { text, done } = useTypingText(OPENING_LINES[currentLineIndex], {
+    speed: 34,
+    startDelay: step === 0 ? 300 : 220,
   })
+
   if (done && !isLast) {
-    setTimeout(() => setI((v) => Math.min(v + 1, OPENING_LINES.length - 1)), 750)
+    setTimeout(() => setStep((v) => Math.min(v + 1, sequence.length - 1)), 750)
   }
+
+  const cdSize = typeof window !== 'undefined' && window.innerWidth < 640 ? 220 : 300
+
   return (
-    <div className="flex min-h-[8.5rem] flex-col items-center gap-1 text-center sm:min-h-[9.5rem]">
-      {OPENING_LINES.slice(0, i).map((l, k) => (
-        <p
-          key={k}
-          className={
-            k === 2
-              ? 'font-serif text-3xl italic text-brown sm:text-5xl'
-              : 'text-xs uppercase tracking-[0.35em] text-olive/70 sm:text-sm'
-          }
-        >
-          {l}
-        </p>
-      ))}
-      <p
-        className={
-          i === 2
-            ? 'font-serif text-3xl italic text-brown sm:text-5xl'
-            : i === 3
-              ? 'max-w-md text-sm italic text-ink/70 sm:text-base'
-              : 'text-xs uppercase tracking-[0.35em] text-olive/70 sm:text-sm'
-        }
+    <>
+      <motion.div 
+        className="flex w-full flex-col items-center justify-end pb-8 sm:pb-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5, ease: 'easeOut', delay: 0.2 }}
       >
-        {text}
-        <span className="ml-0.5 inline-block w-[1px] animate-pulse text-orange">|</span>
-      </p>
-    </div>
+        <p className="font-serif text-3xl italic text-brown sm:text-5xl">
+          {OPENING_LINES[2]}
+        </p>
+      </motion.div>
+
+      <div style={{ height: cdSize, width: cdSize }} className="flex-none" />
+
+      <div className="flex w-full flex-col items-center justify-start gap-1 px-6 pt-8 text-center sm:pt-10">
+        {step > 0 && (
+          <p className="text-xs uppercase tracking-[0.35em] text-olive/70 sm:text-sm">
+            {OPENING_LINES[0]}
+          </p>
+        )}
+        {step === 0 && (
+          <p className="text-xs uppercase tracking-[0.35em] text-olive/70 sm:text-sm">
+            {text}
+            <span className="ml-0.5 inline-block w-[1px] animate-pulse text-orange">|</span>
+          </p>
+        )}
+
+        {step > 1 && (
+          <p className="text-xs uppercase tracking-[0.35em] text-olive/70 sm:text-sm">
+            {OPENING_LINES[1]}
+          </p>
+        )}
+        {step === 1 && (
+          <p className="text-xs uppercase tracking-[0.35em] text-olive/70 sm:text-sm">
+            {text}
+            <span className="ml-0.5 inline-block w-[1px] animate-pulse text-orange">|</span>
+          </p>
+        )}
+
+        {step > 2 && (
+          <p className="max-w-md text-sm italic text-ink/70 sm:text-base">
+            {OPENING_LINES[3]}
+          </p>
+        )}
+        {step === 2 && (
+          <p className="max-w-md text-sm italic text-ink/70 sm:text-base">
+            {text}
+            <span className="ml-0.5 inline-block w-[1px] animate-pulse text-orange">|</span>
+          </p>
+        )}
+
+        <p className="mt-6 text-center text-[0.7rem] uppercase tracking-[0.3em] text-olive/60">
+          tap the record to begin
+        </p>
+      </div>
+    </>
   )
 }
 
@@ -223,13 +260,10 @@ function Experience({ scene, setScene }) {
           <motion.div
             key="intro"
             ref={openingTextRef}
-            className="pointer-events-none absolute inset-x-0 bottom-[12%] z-[66] flex flex-col items-center px-6"
+            className="pointer-events-none absolute inset-0 z-[66] grid grid-rows-[1fr_auto_1fr] justify-items-center"
             exit={{ opacity: 0 }}
           >
             <OpeningIntro />
-            <p className="mt-6 text-center text-[0.7rem] uppercase tracking-[0.3em] text-olive/60">
-              tap the record to begin
-            </p>
           </motion.div>
         )}
       </AnimatePresence>

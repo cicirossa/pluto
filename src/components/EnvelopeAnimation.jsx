@@ -28,7 +28,10 @@ export default function EnvelopeAnimation() {
             style={{ perspective: '900px' }}
           >
             {/* envelope body */}
-            <div className="relative h-56 w-80 sm:h-64 sm:w-96">
+            <div 
+              className="relative h-56 w-80 sm:h-64 sm:w-96"
+              style={{ clipPath: 'polygon(-50% -200%, 150% -200%, 150% 100%, -50% 100%)' }}
+            >
               {/* letter that slides out */}
               <motion.div
                 className="absolute left-1/2 top-4 z-20 h-44 w-64 -translate-x-1/2 rounded-sm bg-paper shadow-scrap sm:h-52 sm:w-72"
@@ -63,10 +66,10 @@ export default function EnvelopeAnimation() {
               />
               {/* flap */}
               <motion.div
-                className="absolute left-0 top-0 z-40 h-1/2 w-full origin-top"
+                className={`absolute left-0 top-0 h-[78%] w-full origin-top ${stage === 'closed' || stage === 'open' ? 'z-40' : 'z-10'}`}
                 style={{
                   background: 'linear-gradient(160deg, #9a6647, #7a4f35)',
-                  clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                  clipPath: 'polygon(0 0, 100% 0, 100% 48.7%, 50% 100%, 0 48.7%)',
                   transformStyle: 'preserve-3d',
                 }}
                 initial={{ rotateX: 0 }}
@@ -75,7 +78,7 @@ export default function EnvelopeAnimation() {
               />
               {/* wax seal */}
               <motion.div
-                className="absolute left-1/2 top-[42%] z-50 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-orange text-paper shadow-scrap"
+                className="absolute left-1/2 top-[70%] z-50 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-orange text-paper shadow-scrap"
                 animate={{ opacity: stage === 'closed' ? 1 : 0, scale: stage === 'closed' ? 1 : 0.6 }}
               >
                 ♡

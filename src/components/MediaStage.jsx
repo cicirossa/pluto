@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import PhotoAnimator from './PhotoAnimator'
 import { PHOTOS } from '../data/photos'
 import { useTimeline } from '../context/TimelineContext'
@@ -63,11 +63,17 @@ export default function MediaStage() {
     })
   }, [activeIndex, layout])
 
+  const isDirect = typeof window !== 'undefined' && window.location.hash.slice(1) === 'main'
+  const entranceDelay = isDirect ? 0.2 : 1.55
+
   return (
-    <div
+    <motion.div
       ref={stageRef}
       className="relative h-full w-full overflow-hidden"
       style={{ perspective: '1300px' }}
+      initial={{ opacity: 0, x: 60 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 4.2, ease: [0.22, 1, 0.36, 1], delay: entranceDelay }}
     >
       {/* stage floor glow that the projector beam lands on */}
       <div
@@ -90,6 +96,6 @@ export default function MediaStage() {
           />
         ))}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }

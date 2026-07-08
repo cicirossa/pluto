@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { LYRICS } from '../data/lyrics'
 import { useTimeline } from '../context/TimelineContext'
 
@@ -26,8 +27,16 @@ export default function LyricsPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex])
 
+  const isDirect = typeof window !== 'undefined' && window.location.hash.slice(1) === 'main'
+  const entranceDelay = isDirect ? 0.2 : 1.55
+
   return (
-    <div className="glass-dark relative h-full w-full overflow-hidden rounded-[24px]">
+    <motion.div 
+      initial={{ opacity: 0, x: -60 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 4.2, ease: [0.22, 1, 0.36, 1], delay: entranceDelay }}
+      className="glass-dark relative h-full w-full overflow-hidden rounded-[24px]"
+    >
       {/* faint film scanline sheen on the panel */}
       <div
         aria-hidden
@@ -85,6 +94,6 @@ export default function LyricsPanel() {
           })}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -8,7 +8,7 @@ import { useFrame } from '../context/TimelineContext'
 // `tier`: 'hero' (front, in focus) | 'secondary' (layered behind, dimmer/soft).
 const DEFAULT_TAPE = [{ top: '-10px', left: '40%', rotate: -6 }]
 
-export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier = 'hero' }) {
+export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier = 'hero', caption = null }) {
   const ref = useRef(null)
   const isHero = tier === 'hero'
 
@@ -96,6 +96,33 @@ export default function PhotoAnimator({ photo, slot, energy = 0.5, pointer, tier
           ))}
         </motion.div>
       </motion.div>
+
+      {/* One-time caption card — blurred glass with a paper outline that echoes
+          the photo frame, and softly shadowed text. Editable placeholder. */}
+      {caption && (
+        <motion.figcaption
+          className="absolute left-1/2 top-full z-20 mt-4 w-[88%] -translate-x-1/2"
+          initial={{ opacity: 0, y: 12, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 8, transition: { duration: 0.5 } }}
+          transition={{ delay: 0.55, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* paper mat, mirroring the photo's outline */}
+          <div className="shadow-scrap rounded-[4px] bg-paper/80 p-1.5 backdrop-blur-md">
+            <div className="rounded-[2px] px-4 py-2.5 text-center ring-1 ring-brown/15">
+              <p
+                className="font-serif text-[0.95rem] leading-snug text-brown sm:text-base"
+                style={{
+                  textShadow:
+                    '0 1px 10px rgba(245,235,217,0.9), 0 1px 2px rgba(58,44,34,0.2)',
+                }}
+              >
+                {caption}
+              </p>
+            </div>
+          </div>
+        </motion.figcaption>
+      )}
     </motion.figure>
   )
 }

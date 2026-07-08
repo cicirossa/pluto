@@ -52,6 +52,10 @@ export default function MediaStage() {
   const { count, energy } = PHASE[phase] ?? PHASE.beginning
   const layout = LAYOUTS[count]
 
+  // Captions (photos 1–3) show only the FIRST time each photo appears. Once the
+  // hero moves on, that photo's caption is marked seen and never returns.
+  const captionSeen = useRef(new Set())
+
   // Rotating window into the 12 photos, keyed to the lyric line: memories
   // advance with the song and reappear later in new arrangements. Deterministic
   // (no randomness — V3 §10).
@@ -59,12 +63,31 @@ export default function MediaStage() {
     const step = Math.floor(Math.max(0, activeIndex) / 2)
     return layout.map((slot, i) => {
       const photo = PHOTOS[(step + i * 5) % PHOTOS.length]
-      return { slot, photo, key: `${photo.id}-${i}`, tier: i === 0 ? 'hero' : 'secondary' }
+      const tier = i === 0 ? 'hero' : 'secondary'
+      const showCaption =
+        tier === 'hero' && !!photo.caption && !captionSeen.current.has(photo.id)
+      return {
+        slot,
+        photo,
+        key: `${photo.id}-${i}`,
+        tier,
+        caption: showCaption ? photo.caption : null,
+      }
     })
   }, [activeIndex, layout])
 
   const isDirect = typeof window !== 'undefined' && window.location.hash.slice(1) === 'main'
   const entranceDelay = isDirect ? 0.2 : 1.55
+
+  // When the hero changes, retire the previous hero's caption (shown once).
+  const heroId = shown[0]?.photo?.id
+  const prevHeroRef = useRef(null)
+  useEffect(() => {
+    if (prevHeroRef.current != null && prevHeroRef.current !== heroId) {
+      captionSeen.current.add(prevHeroRef.current)
+    }
+    prevHeroRef.current = heroId ?? null
+  }, [heroId])
 
   return (
     <motion.div
@@ -85,7 +108,7 @@ export default function MediaStage() {
         }}
       />
       <AnimatePresence mode="popLayout">
-        {shown.map(({ slot, photo, key, tier }) => (
+        {shown.map(({ slot, photo, key, tier, caption }) => (
           <PhotoAnimator
             key={key}
             photo={photo}
@@ -93,6 +116,7 @@ export default function MediaStage() {
             energy={energy}
             pointer={pointer}
             tier={tier}
+            caption={caption}
           />
         ))}
       </AnimatePresence>
